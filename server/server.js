@@ -1,47 +1,33 @@
 require('./config/config');
+
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+const routes = require('./routes/usuario');
 
 
 const app = express();
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
+//routes
+app.use('/', routes.app);
 
-app.get('/usuario', function(req, res) {
-    res.json('get Usuario')
+mongoose.connect(process.env.URLDB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true
 });
 
-app.post('/usuario', function(req, res) {
-
-    let body = req.body;
-
-    if (body.nombre === undefined) {
-        res.status(400).json({
-            ok: false,
-            message: 'the name is required'
-        });
-    } else {
-        res.json({ persona: body });
-    }
-
-
-});
-
-app.put('/usuario/:id', function(req, res) {
-    let id = req.params.id;
-    //res.json('put Usuario  :' + id)
-    res.json({
-        id
-    });
-});
-
-app.delete('/usuario', function(req, res) {
-    res.json('detele Usuario')
-});
+const conect = mongoose.connection;
+conect.on('error', console.error.bind(console, 'error de conexion:'));
+conect.once('open', () => { console.log('Conexion a Base de datos iniciada') });
 
 app.listen(process.env.PORT, () => {
     console.log(`escuchando puerto ${process.env.PORT}`)
 });
+
+module.exports = { app };
